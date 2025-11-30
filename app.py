@@ -48,6 +48,8 @@ if 'processed_files' not in st.session_state:
     st.session_state.processed_files = []
 if 'quiz_history' not in st.session_state:
     st.session_state.quiz_history = []
+if 'quiz_history_detailed' not in st.session_state:
+    st.session_state.quiz_history_detailed = []
 
 def main():
     student_info_sidebar()
@@ -171,10 +173,10 @@ def render_quiz():
 
     if st.button("Generate New Quiz"):
         with st.spinner("Generating quiz questions..."):
-            # Pick random doc content
-            all_text = " ".join([m['text'] for m in st.session_state.vector_store.metadata])
+            # Pass full metadata (list of dicts) to generator
+            all_docs = st.session_state.vector_store.metadata
             qg = QuizGenerator()
-            st.session_state.current_quiz = qg.generate_mcq(all_text, num_questions=5)
+            st.session_state.current_quiz = qg.generate_mcq(all_docs, num_questions=5)
             st.session_state.quiz_answers = {}
 
     if 'current_quiz' in st.session_state:
@@ -196,8 +198,18 @@ def render_quiz():
                     if user_choice == correct_choice:
                         st.success(f"✅ Correct! Answer: {correct_choice}")
                         score += 1
+                        is_correct = True
                     else:
                         st.error(f"❌ Wrong! You selected: {user_choice}. Correct Answer: {correct_choice}")
+                        is_correct = False
+                    
+                    # Log detailed result
+                    st.session_state.quiz_history_detailed.append({
+                        "question": q['question'],
+                        "is_correct": is_correct,
+                        "source": q.get('source', 'Unknown'),
+                        "timestamp": pd.Timestamp.now()
+                    })
                 
                 if score > 3:
                     st.balloons()
@@ -239,13 +251,41 @@ def render_progress():
         fig2 = px.histogram(df, x="Score", nbins=5, title="Score Distribution")
         st.plotly_chart(fig2, use_container_width=True)
 
+    # --- Advanced Analytics ---
+    st.divider()
+    st.subheader("🧠 Deep Dive Analytics")
+    
+    # Calculate Metrics
+    weak_areas = AnalyticsEngine.analyze_weak_areas(st.session_state.quiz_history_detailed)
+    learning_metrics = AnalyticsEngine.calculate_learning_metrics(forecast.get('slope', 0), np.mean(data))
+    
+    col_a, col_b = st.columns(2)
+    
+    with col_a:
+        st.markdown("#### ⚠️ Weak Topics (Needs Revision)")
+        if weak_areas:
+            for source, error_rate in weak_areas.items():
+                st.progress(error_rate, text=f"{source} (Error Rate: {int(error_rate*100)}%)")
+        else:
+            st.success("No weak areas detected yet! Keep it up.")
+            
+    with col_b:
+        st.markdown("#### 🚀 Learning Velocity")
+        st.metric("Learning Speed", learning_metrics['learning_speed'])
+        st.metric("Time to Mastery", learning_metrics['time_to_mastery'])
+        
+        if weak_areas:
+            st.info(f"💡 Recommendation: Review **{list(weak_areas.keys())[0]}** before next quiz.")
+
     st.divider()
     if st.button("📄 Download Progress Report (PDF)"):
         # Prepare analytics dict
         analytics_data = {
             "average": f"{np.mean(data):.2f}",
             "predicted_score": f"{forecast['predicted_score']}" if forecast['predicted_score'] is not None else "N/A",
-            "trend": forecast['trend']
+            "trend": forecast['trend'],
+            "weak_areas": weak_areas,
+            "learning_metrics": learning_metrics
         }
         
         # Use session state info or defaults

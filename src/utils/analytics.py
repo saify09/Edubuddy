@@ -43,3 +43,68 @@ class AnalyticsEngine:
             "trend": trend,
             "slope": m
         }
+
+    @staticmethod
+    def analyze_weak_areas(quiz_history_detailed: List[Dict]) -> Dict[str, float]:
+        """
+        Identifies weak topics based on incorrect answers per source document.
+        Returns: {'DocumentName': ErrorRate (0.0-1.0)}
+        """
+        if not quiz_history_detailed:
+            return {}
+
+        topic_stats = {} # {source: {'total': 0, 'wrong': 0}}
+        
+        for q in quiz_history_detailed:
+            source = q.get('source', 'Unknown')
+            is_correct = q.get('is_correct', False)
+            
+            if source not in topic_stats:
+                topic_stats[source] = {'total': 0, 'wrong': 0}
+            
+            topic_stats[source]['total'] += 1
+            if not is_correct:
+                topic_stats[source]['wrong'] += 1
+                
+        # Calculate error rates
+        weak_areas = {}
+        for source, stats in topic_stats.items():
+            if stats['total'] > 0:
+                error_rate = stats['wrong'] / stats['total']
+                if error_rate > 0: # Only include if there are errors
+                    weak_areas[source] = round(error_rate, 2)
+                    
+        # Sort by error rate descending
+        return dict(sorted(weak_areas.items(), key=lambda item: item[1], reverse=True))
+
+    @staticmethod
+    def calculate_learning_metrics(slope: float, current_avg: float, max_score: int = 5) -> Dict[str, Any]:
+        """
+        Calculates Learning Speed and Time-to-Mastery.
+        """
+        # Learning Speed
+        if slope > 0.2:
+            speed = "Fast ⚡"
+        elif slope > 0.05:
+            speed = "Steady 🚶"
+        elif slope > -0.05:
+            speed = "Plateaued 🐢"
+        else:
+            speed = "Struggling ⚠️"
+            
+        # Time to Mastery (Attempts to reach max_score)
+        # Formula: (Target - Current) / Slope
+        if slope <= 0.01:
+            mastery_time = "Indefinite (Slope too low)"
+        else:
+            remaining = max_score - current_avg
+            if remaining <= 0:
+                mastery_time = "Mastered! 🎉"
+            else:
+                attempts_needed = int(remaining / slope)
+                mastery_time = f"~{attempts_needed} more attempts"
+                
+        return {
+            "learning_speed": speed,
+            "time_to_mastery": mastery_time
+        }

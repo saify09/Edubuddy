@@ -1,13 +1,20 @@
-import cv2
-import easyocr
+try:
+    import cv2
+    import easyocr
+    import numpy as np
+except ImportError:
+    cv2 = None
+    easyocr = None
+    np = None
 import os
-import numpy as np
 
 # Re-use the reader from image_parser if possible, or init new one
-try:
-    reader = easyocr.Reader(['en'], gpu=False, verbose=False)
-except:
-    reader = None
+reader = None
+if easyocr:
+    try:
+        reader = easyocr.Reader(['en'], gpu=False, verbose=False)
+    except:
+        reader = None
 
 def parse_video(file_path: str, interval_seconds: int = 5) -> str:
     """
@@ -15,6 +22,9 @@ def parse_video(file_path: str, interval_seconds: int = 5) -> str:
     """
     if not reader:
         return "[Error: OCR Engine not available]"
+    
+    if cv2 is None:
+        return "[Error: OpenCV not available]"
 
     text_content = []
     cap = cv2.VideoCapture(file_path)

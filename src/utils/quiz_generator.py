@@ -6,21 +6,35 @@ class QuizGenerator:
     def __init__(self):
         pass
 
-    def generate_mcq(self, text: str, num_questions: int = 5) -> List[Dict]:
+    def generate_mcq(self, documents: List[Dict], num_questions: int = 5) -> List[Dict]:
         """
-        Generates MCQs from text using simple keyword masking.
+        Generates MCQs from a list of document chunks (dicts with 'text' and 'source').
+        Returns questions with 'source' metadata.
         """
-        sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', text)
-        sentences = [s for s in sentences if len(s) > 50 and len(s) < 200]
+        if not documents:
+            return []
+
+        # Filter chunks that are long enough
+        valid_docs = [d for d in documents if len(d['text']) > 50]
+        if not valid_docs:
+            valid_docs = documents
+
+        selected_docs = random.sample(valid_docs, min(num_questions, len(valid_docs)))
         
-        if len(sentences) < num_questions:
-            selected_sentences = sentences
-        else:
-            selected_sentences = random.sample(sentences, num_questions)
-            
         quiz = []
-        for sentence in selected_sentences:
+        for doc in selected_docs:
+            text = doc['text']
+            source = doc.get('source', 'Unknown')
+            
+            sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', text)
+            # Pick a suitable sentence
+            suitable_sentences = [s for s in sentences if len(s) > 30 and len(s) < 300]
+            if not suitable_sentences:
+                continue
+                
+            sentence = random.choice(suitable_sentences)
             words = sentence.split()
+            
             # Simple heuristic: pick a long word as the answer
             candidates = [w for w in words if len(w) > 5 and w.isalpha()]
             if not candidates:
@@ -29,8 +43,9 @@ class QuizGenerator:
             answer = random.choice(candidates)
             question_text = sentence.replace(answer, "______")
             
-            # Generate distractors (random words from other sentences)
-            all_words = [w for w in text.split() if len(w) > 5 and w.isalpha() and w != answer]
+            # Generate distractors from ALL docs to ensure variety
+            all_text = " ".join([d['text'] for d in documents])
+            all_words = [w for w in all_text.split() if len(w) > 5 and w.isalpha() and w != answer]
             distractors = random.sample(all_words, 3) if len(all_words) >= 3 else ["Option A", "Option B", "Option C"]
             
             options = distractors + [answer]
@@ -39,7 +54,8 @@ class QuizGenerator:
             quiz.append({
                 "question": question_text,
                 "options": options,
-                "answer": answer
+                "answer": answer,
+                "source": source  # Track the source document
             })
             
         return quiz

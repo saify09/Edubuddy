@@ -1,15 +1,21 @@
-import easyocr
-import numpy as np
-import cv2
-import os
+try:
+    import easyocr
+    import cv2
+    import numpy as np
+except ImportError:
+    easyocr = None
+    cv2 = None
+    np = None
 
 # Initialize reader once (lazy load could be better but this is fine for now)
 # Using CPU to avoid CUDA issues if not present, and English language
-try:
-    reader = easyocr.Reader(['en'], gpu=False, verbose=False)
-except Exception as e:
-    print(f"Warning: EasyOCR failed to initialize: {e}")
-    reader = None
+reader = None
+if easyocr:
+    try:
+        reader = easyocr.Reader(['en'], gpu=False, verbose=False)
+    except Exception as e:
+        print(f"Warning: EasyOCR failed to initialize: {e}")
+        reader = None
 
 def preprocess_image(image):
     """
@@ -17,6 +23,9 @@ def preprocess_image(image):
     Converts to grayscale, denoises, and applies adaptive thresholding.
     """
     try:
+        if cv2 is None:
+            return image
+
         # Check if it's a path or numpy array
         if isinstance(image, str):
             if not os.path.exists(image):

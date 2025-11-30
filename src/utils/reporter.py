@@ -32,6 +32,25 @@ def generate_pdf_report(student_name: str, roll_no: str, quiz_history: list, ana
         pdf.cell(0, 10, f"Average Score: {sanitize(analytics.get('average', 'N/A'))}", ln=True)
         pdf.cell(0, 10, f"Predicted Next Score: {sanitize(analytics.get('predicted_score', 'N/A'))}", ln=True)
         pdf.cell(0, 10, f"Trend: {sanitize(analytics.get('trend', 'N/A'))}", ln=True)
+        
+        # Advanced Analytics
+        if 'learning_metrics' in analytics:
+            lm = analytics['learning_metrics']
+            pdf.ln(5)
+            pdf.set_font("Arial", 'B', 13)
+            pdf.cell(0, 10, "Learning Insights", ln=True)
+            pdf.set_font("Arial", size=12)
+            pdf.cell(0, 10, f"Learning Speed: {sanitize(lm.get('learning_speed', 'N/A'))}", ln=True)
+            pdf.cell(0, 10, f"Time to Mastery: {sanitize(lm.get('time_to_mastery', 'N/A'))}", ln=True)
+            
+        if 'weak_areas' in analytics and analytics['weak_areas']:
+            pdf.ln(5)
+            pdf.set_font("Arial", 'B', 13)
+            pdf.cell(0, 10, "Recommended Revision Topics", ln=True)
+            pdf.set_font("Arial", size=12)
+            for source, rate in analytics['weak_areas'].items():
+                pdf.cell(0, 10, f"- {sanitize(source)} (Error Rate: {int(rate*100)}%)", ln=True)
+        
         pdf.ln(10)
     
     # Chart Generation
