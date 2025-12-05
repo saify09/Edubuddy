@@ -1,8 +1,9 @@
 import os
-from transformers import pipeline
+from transformers import pipeline, TextIteratorStreamer
+from threading import Thread
 
 class Generator:
-    def __init__(self, model_name: str = "MBZUAI/LaMini-Flan-T5-77M"):
+    def __init__(self, model_name: str = "MBZUAI/LaMini-Flan-T5-248M"):
         self.model_name = model_name
         self.pipe = None
         self._load_model()
@@ -20,9 +21,10 @@ class Generator:
             print(f"Failed to load model: {e}")
             self.pipe = None
 
-    def generate_answer(self, query: str, context_chunks: list) -> str:
+    def generate_answer(self, query: str, context_chunks: list, stream: bool = False):
         """
         Generates an answer based on the query and retrieved context.
+        If stream=True, returns a generator yielding tokens.
         """
         context_text = "\n\n".join([c['text'] for c in context_chunks])
         
@@ -31,10 +33,35 @@ class Generator:
             prompt = f"Answer the following question based on the context below:\n\nContext:\n{context_text}\n\nQuestion: {query}\n\nAnswer:"
             
             # Truncate context if too long (simple heuristic, T5 has 512 limit usually)
-            if len(prompt) > 2000:
-                prompt = prompt[:2000]
+            if len(prompt) > 1500:
+                prompt = prompt[:1500]
             
-            output = self.pipe(prompt, max_length=256, do_sample=False)
-            return output[0]['generated_text']
+            if stream:
+                streamer = TextIteratorStreamer(self.pipe.tokenizer, skip_prompt=True, skip_special_tokens=True)
+                generation_kwargs = dict(max_length=256, do_sample=False, streamer=streamer, num_beams=1)
+                
+                thread = Thread(target=self._run_pipeline, args=(prompt, generation_kwargs))
+                thread.start()
+                
+                return streamer
+            else:
+                output = self.pipe(prompt, max_length=256, do_sample=False)
+                return output[0]['generated_text']
         else:
+            if stream:
+                # Mock streamer for error case
+                def mock_stream():
+                    yield "**LLM not loaded.**\n\nContext:\n"
+                    yield context_text
+                return mock_stream()
             return f"**LLM not loaded.**\n\nContext:\n{context_text}"
+
+    def _run_pipeline(self, prompt, generation_kwargs):
+        """Helper to run pipeline in thread with error catching."""
+        try:
+            # Pass prompt as positional argument, as 'inputs' kwarg seems to fail
+            self.pipe(prompt, **generation_kwargs)
+        except Exception as e:
+            print(f"ERROR: Pipeline generation failed: {e}")
+            # In case of error, we can't easily close the streamer from here without access to it,
+            # but printing the error helps debugging.

@@ -35,9 +35,11 @@ def process_file_content(file_name: str, text: str, chunk_size: int = 1000, over
     for i, chunk in enumerate(raw_chunks):
         chunks_with_metadata.append({
             "id": f"{file_name}_{i}",
-            "source": file_name,
-            "chunk_index": i,
-            "text": chunk
+            "text": chunk,
+            "metadata": {
+                "source": file_name,
+                "chunk_index": i
+            }
         })
         
     return chunks_with_metadata

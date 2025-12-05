@@ -43,4 +43,11 @@ data/index/
 
 # OS
 .DS_Store
-Thumbs.db
+
+# App Data
+temp/
+userdata/
+*.db
+edubuddy_users.db
+index.faiss
+metadata.pkl

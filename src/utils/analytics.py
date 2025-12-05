@@ -16,7 +16,8 @@ class AnalyticsEngine:
             return {
                 "predicted_score": None,
                 "trend": "Insufficient Data",
-                "confidence": 0.0
+                "confidence": 0.0,
+                "slope": 0.0
             }
         
         # X axis: Attempt numbers (1, 2, 3...)
@@ -31,10 +32,6 @@ class AnalyticsEngine:
         # Predict next value
         next_attempt = len(history) + 1
         predicted_score = m * next_attempt + c
-        
-        # Clip score to realistic bounds (e.g., 0 to max score seen or 100%)
-        # Assuming max score is roughly consistent, let's cap at max(history) + buffer or 100% if we knew the denominator.
-        # For now, just raw prediction.
         
         trend = "Improving 🚀" if m > 0.1 else "Declining 📉" if m < -0.1 else "Stable ⚖️"
         
@@ -78,6 +75,34 @@ class AnalyticsEngine:
         return dict(sorted(weak_areas.items(), key=lambda item: item[1], reverse=True))
 
     @staticmethod
+    def analyze_chapter_performance(quiz_history_detailed: List[Dict]) -> Dict[str, float]:
+        """
+        Calculates accuracy per topic/chapter.
+        Returns: {'TopicName': Accuracy (0.0-1.0)}
+        """
+        if not quiz_history_detailed:
+            return {}
+
+        topic_stats = {} # {topic: {'total': 0, 'correct': 0}}
+        
+        for q in quiz_history_detailed:
+            topic = q.get('topic', 'General')
+            if topic not in topic_stats:
+                topic_stats[topic] = {'total': 0, 'correct': 0}
+            
+            topic_stats[topic]['total'] += 1
+            if q['is_correct']:
+                topic_stats[topic]['correct'] += 1
+        
+        # Calculate accuracy
+        performance = {}
+        for topic, stats in topic_stats.items():
+            if stats['total'] > 0:
+                performance[topic] = round(stats['correct'] / stats['total'], 2)
+            
+        return performance
+
+    @staticmethod
     def calculate_learning_metrics(slope: float, current_avg: float, max_score: int = 5) -> Dict[str, Any]:
         """
         Calculates Learning Speed and Time-to-Mastery.
@@ -93,7 +118,6 @@ class AnalyticsEngine:
             speed = "Struggling ⚠️"
             
         # Time to Mastery (Attempts to reach max_score)
-        # Formula: (Target - Current) / Slope
         if slope <= 0.01:
             mastery_time = "Indefinite (Slope too low)"
         else:

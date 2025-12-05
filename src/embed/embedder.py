@@ -10,10 +10,10 @@ class Embedder:
         """
         Embeds a single string.
         """
-        return self.model.encode([text])[0]
+        return self.model.encode([text], truncation=True)[0]
 
     def embed_chunks(self, chunks: List[str]) -> np.ndarray:
         """
         Embeds a list of strings.
         """
-        return self.model.encode(chunks)
+        return self.model.encode(chunks, truncation=True)
