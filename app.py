@@ -81,7 +81,7 @@ def render_home():
 
     if input_method == "📁 Upload Files":
         uploaded_files = st.file_uploader("Upload Files", 
-                                        type=['pdf', 'docx', 'txt', 'md', 'png', 'jpg', 'jpeg', 'mp4', 'avi', 'mkv'], 
+                                        type=['pdf', 'docx', 'txt', 'md', 'png', 'jpg', 'jpeg', 'mp4', 'avi'], 
                                         accept_multiple_files=True)
         if st.button("Process & Index Files", type="primary", width="stretch"):
             if uploaded_files:
