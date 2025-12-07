@@ -74,7 +74,7 @@ def render_signup():
         
         # Username with suggestion
         st.markdown("**:red[Username *]** (lowercase, e.g. john_doe123)")
-        username_input = st.text_input("Username", label_visibility="collapsed", key='signup_username', placeholder="john.doe")
+        username_input = st.text_input("Username", label_visibility="collapsed", key='signup_username', placeholder="john_doe123")
         
         st.markdown("**:red[Password *]**")
         password = st.text_input("Password", type="password", label_visibility="collapsed")

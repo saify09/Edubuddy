@@ -20,11 +20,22 @@ class Summarizer:
         Generates an abstractive summary using LLM.
         """
         if self.pipe:
-            # Chunk text if too long
-            if len(text) > 1500:
-                text = text[:1500]
+            # Chunking strategy to handle long documents
+            # Local LLM window is usually 512 tokens (~2000 chars), we play safe with 1024 chars chunks
+            max_chunk_size = 1024
+            chunks = [text[i:i+max_chunk_size] for i in range(0, len(text), max_chunk_size)]
             
-            output = self.pipe(text, max_length=256, min_length=50, do_sample=False)
-            return output[0]['summary_text']
+            summaries = []
+            for chunk in chunks:
+                try:
+                    # Truncation=True allows the model to handle slight overflows gracefully
+                    output = self.pipe(chunk, max_length=150, min_length=30, do_sample=False, truncation=True)
+                    summaries.append(output[0]['summary_text'])
+                except Exception as e:
+                    print(f"Error summarizing chunk: {e}")
+                    continue
+            
+            final_summary = " ".join(summaries)
+            return final_summary
         else:
             return "Summarization model not loaded."
