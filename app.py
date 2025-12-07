@@ -94,8 +94,14 @@ def render_home():
                     import tempfile
                     import shutil
                     
-                    # Use a temporary directory that cleans up automatically
-                    with tempfile.TemporaryDirectory() as temp_dir:
+                    # Use a local temporary directory to avoid cross-drive Watchdog errors
+                    local_temp_dir = os.path.join(os.getcwd(), "temp_ingest")
+                    if not os.path.exists(local_temp_dir):
+                        os.makedirs(local_temp_dir)
+
+                    # Use custom cleanup instead of TemporaryDirectory context manager if needed, 
+                    # but context manager with 'dir=' works best.
+                    with tempfile.TemporaryDirectory(dir=local_temp_dir) as temp_dir:
                         saved_paths = []
                         for uf in uploaded_files:
                             path = os.path.join(temp_dir, uf.name)

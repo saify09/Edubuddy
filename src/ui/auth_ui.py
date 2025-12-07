@@ -61,18 +61,16 @@ def render_signup():
         return ""
 
     with st.form("signup_form"):
-        # Mobile Fix: Remove columns for Name fields to prevent squishing
+        # Explicit Vertical Stack as requested
+        st.markdown("**Personal Details**")
         first_name = st.text_input("First Name *", key='signup_fname')
         last_name = st.text_input("Last Name *", key='signup_lname')
-        
         email = st.text_input("Email")
         contact_info = st.text_input("Contact Info")
         
-        col_meta1, col_meta2 = st.columns(2)
-        with col_meta1:
-            gender = st.selectbox("Gender", ["Male", "Female", "Other"])
-        with col_meta2:
-            profession = st.selectbox("Profession", ["Student", "Teacher", "Professional", "Researcher", "Other"])
+        st.markdown("**Profile**")
+        gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+        profession = st.selectbox("Profession", ["Student", "Teacher", "Professional", "Researcher", "Other"])
         
         # Username with suggestion
         st.markdown("**:red[Username *]** (lowercase, e.g. john_doe123)")
