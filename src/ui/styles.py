@@ -75,23 +75,45 @@ def load_css():
            ==========================================================================
         */
 
-        /* Cards (Glassmorphism) */
-        .card, .auth-container, [data-testid="stForm"] {
+        /* Sidebar - Force Contrast */
+        section[data-testid="stSidebar"] {
             background-color: var(--card-bg);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow-sm);
+            border-right: 1px solid var(--glass-border);
         }
         
+        section[data-testid="stSidebar"] * {
+            color: var(--text-color) !important;
+        }
+
+        /* File Uploader - Fix White-on-White */
+        [data-testid="stFileUploader"] {
+            background-color: var(--bg-color);
+            border: 2px dashed var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        
+        [data-testid="stFileUploader"] section {
+            background-color: transparent !important; /* Remove internal white bg */
+        }
+        
+        [data-testid="stFileUploader"] span, 
+        [data-testid="stFileUploader"] small, 
+        [data-testid="stFileUploader"] div {
+            color: var(--text-color) !important;
+        }
+        
+        [data-testid="stFileUploader"] button {
+             background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+             color: white !important;
+             border: none;
+        }
+
         /* Inputs - High Contrast Borders */
         .stTextInput > div > div > input,
         .stSelectbox > div > div > div,
-        .stTextArea > div > div > textarea,
-        .stFileUploader {
+        .stTextArea > div > div > textarea {
             background-color: var(--bg-color) !important; /* Use solid bg for inputs */
             border: 2px solid var(--glass-border) !important;
             color: var(--text-color) !important;
