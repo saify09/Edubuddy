@@ -77,7 +77,7 @@ def load_css():
         */
 
         /* Cards (Glassmorphism) */
-        .card, .auth-container {
+        .card, .auth-container, [data-testid="stForm"] {
             background-color: var(--card-bg);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -89,7 +89,7 @@ def load_css():
             transition: all 0.3s ease;
         }
         
-        .card:hover {
+        .card:hover, [data-testid="stForm"]:hover {
             box-shadow: var(--shadow-md);
             transform: translateY(-2px);
             border-color: var(--accent-color);
