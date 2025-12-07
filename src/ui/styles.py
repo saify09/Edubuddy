@@ -69,6 +69,34 @@ def load_css():
             opacity: 1 !important; /* Prevent Streamlit from dimming it */
         }
 
+        /* 
+           ==========================================================================
+           3. COMPONENTS
+           ==========================================================================
+        */
+
+        /* Sidebar - Force Contrast */
+        section[data-testid="stSidebar"] {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid var(--glass-border);
+        }
+        
+        section[data-testid="stSidebar"] * {
+            color: var(--text-color) !important;
+        }
+        
+        /* Explicitly target labels in Sidebar to ensure they aren't overridden */
+        section[data-testid="stSidebar"] label, 
+        section[data-testid="stSidebar"] .stMarkdown p {
+            color: var(--text-color) !important;
+            font-weight: 600 !important;
+        }
+
+        /* File Uploader - Fix White-on-White */
+        [data-testid="stFileUploader"] {
+            background-color: var(--bg-color);
+            border: 2px dashed var(--glass-border);
             border-radius: 12px;
             padding: 1rem;
         }
