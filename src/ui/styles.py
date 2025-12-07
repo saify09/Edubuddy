@@ -124,51 +124,62 @@ def load_css():
         .stTextInput > div > div > input:focus,
         .stTextArea > div > div > textarea:focus {
             border-color: var(--accent-color) !important;
-        /* Primary Buttons (Process, Login, Signup) */
-        [data-testid="baseButton-primary"] {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) !important;
-            color: #ffffff !important;
-            border: none !important;
-            font-weight: 700 !important;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2) !important;
-        }
-        
-        [data-testid="baseButton-primary"]:hover {
-             opacity: 0.95;
-             transform: scale(1.02);
+            background-color: var(--card-bg) !important;
         }
 
-        /* Secondary Buttons (Reset / Clear All Data) - FORCED RED */
-        [data-testid="baseButton-secondary"] {
-            background-color: #ef4444 !important; /* Red-500 */
-            border: 2px solid #dc2626 !important; /* Red-600 */
-            color: #ffffff !important; /* White Text */
-            font-weight: 700 !important;
+        /* Primary Buttons (Process, etc) - UNTOUCHED as requested */
+        .stButton > button {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: #ffffff !important;
+            font-weight: 700;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
-        [data-testid="baseButton-secondary"]:hover {
-            background-color: #dc2626 !important; /* Darker Red */
-            border-color: #b91c1c !important;
-            color: #ffffff !important;
-        }
-        
         /* 
-           ==========================================================================
-           PLACEHOLDER STYLES
-           ==========================================================================
+           Refined Secondary Buttons 
+           Targeting specifically the logic for "Reset/Clear" and form submit buttons 
+           while trying to preserve "Edit/Logout" if they are working.
         */
-        /* Input Placeholders - Whitish Gray */
-        ::placeholder {
-            color: #94a3b8 !important; /* Slate 400 */
-            opacity: 1; /* Firefox */
+
+        /* Fix Login/Signup (Form Submit Buttons) */
+        [data-testid="stFormSubmitButton"] > button {
+             background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) !important;
+             color: white !important;
+             border: none !important;
+        }
+
+        /* Fix "Reset / Clear All Data" - This is typically a secondary button.
+           We ensure it has a contrasting border and text. 
+        */
+        [data-testid="baseButton-secondary"] {
+            border: 2px solid var(--text-color) !important;
+            color: var(--text-color) !important;
+            background: transparent !important;
         }
         
-        :-ms-input-placeholder { /* Internet Explorer 10-11 */
-           color: #94a3b8 !important;
+        [data-testid="baseButton-secondary"]:hover {
+            border-color: #ef4444 !important;
+            color: #ef4444 !important;
+            background-color: rgba(255, 255, 255, 0.1) !important; /* Slight bg for visibility */
         }
         
-        ::-ms-input-placeholder { /* Microsoft Edge */
-           color: #94a3b8 !important;
+        /* Fix Hover Text specifically */
+        [data-testid="baseButton-secondary"]:hover p {
+            color: #ef4444 !important;
+        }
+
+        /* Fix Placeholders to be Whitish Gray */
+        input::placeholder, textarea::placeholder {
+            color: #94a3b8 !important; /* Slate 400 - Whitish Gray */
+            opacity: 1;
+        }
+        
+        /* Ensure Inputs have correct text color */
+        .stTextInput > div > div > input,
+        .stSelectbox > div > div > div,
+        .stTextArea > div > div > textarea {
+            color: var(--text-color) !important;
         }
 
         /* Metrics Values */
