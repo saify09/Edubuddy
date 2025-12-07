@@ -127,13 +127,44 @@ def load_css():
             background-color: var(--card-bg) !important;
         }
 
-        /* Primary Buttons */
-        .stButton > button {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+        /* Primary Buttons (Gradient + White Text) */
+        [data-testid="baseButton-primary"] {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) !important;
             color: #ffffff !important;
             font-weight: 700;
             border: none;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        /* Secondary Buttons (Clear/Delete/Cancel) - High Contrast */
+        [data-testid="baseButton-secondary"] {
+            background: transparent !important;
+            border: 2px solid var(--text-color) !important; /* Match text color exactly */
+            color: var(--text-color) !important;
+        }
+
+        [data-testid="baseButton-secondary"]:hover {
+            border-color: #ef4444 !important; /* Red on hover */
+            color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.1) !important;
+        }
+        
+        /* Form Submit Buttons (often treated as secondary if not specified) */
+        [data-testid="stFormSubmitButton"] > button[kind="secondary"] {
+            background: transparent !important;
+            border: 2px solid var(--text-color) !important;
+            color: var(--text-color) !important;
+        }
+        
+        /* Placeholder Color */
+        ::placeholder {
+            color: #94a3b8 !important; /* Whitish Gray (Slate 400) */
+            opacity: 1; /* Firefox */
+        }
+        
+        /* Fix Input Text Color to be compatible with placeholder */
+        input, textarea {
+            color: var(--text-color) !important;
         }
 
         /* Secondary Buttons (Clear/Delete/Cancel) - High Contrast */

@@ -27,7 +27,7 @@ def render_login():
     with st.form("login_form"):
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        submitted = st.form_submit_button("Login", width="stretch")
+        submitted = st.form_submit_button("Login", type="primary", width="stretch")
         
         if submitted:
             um = UserManager()
@@ -85,7 +85,7 @@ def render_signup():
         # Profile Pic
         uploaded_file = st.file_uploader("Profile Picture (Round)", type=['jpg', 'png', 'jpeg'])
         
-        submitted = st.form_submit_button("Sign Up", width="stretch")
+
         
         if submitted:
             # Auto-convert username to lowercase
