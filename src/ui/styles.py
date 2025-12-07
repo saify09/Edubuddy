@@ -124,60 +124,51 @@ def load_css():
         .stTextInput > div > div > input:focus,
         .stTextArea > div > div > textarea:focus {
             border-color: var(--accent-color) !important;
-            background-color: var(--card-bg) !important;
-        }
-
-        /* Primary Buttons (Gradient + White Text) */
+        /* Primary Buttons (Process, Login, Signup) */
         [data-testid="baseButton-primary"] {
             background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) !important;
             color: #ffffff !important;
-            font-weight: 700;
-            border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border: none !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2) !important;
+        }
+        
+        [data-testid="baseButton-primary"]:hover {
+             opacity: 0.95;
+             transform: scale(1.02);
         }
 
-        /* Secondary Buttons (Clear/Delete/Cancel) - High Contrast */
+        /* Secondary Buttons (Reset / Clear All Data) - FORCED RED */
         [data-testid="baseButton-secondary"] {
-            background: transparent !important;
-            border: 2px solid var(--text-color) !important; /* Match text color exactly */
-            color: var(--text-color) !important;
+            background-color: #ef4444 !important; /* Red-500 */
+            border: 2px solid #dc2626 !important; /* Red-600 */
+            color: #ffffff !important; /* White Text */
+            font-weight: 700 !important;
         }
 
         [data-testid="baseButton-secondary"]:hover {
-            border-color: #ef4444 !important; /* Red on hover */
-            color: #ef4444 !important;
-            background: rgba(239, 68, 68, 0.1) !important;
+            background-color: #dc2626 !important; /* Darker Red */
+            border-color: #b91c1c !important;
+            color: #ffffff !important;
         }
         
-        /* Form Submit Buttons (often treated as secondary if not specified) */
-        [data-testid="stFormSubmitButton"] > button[kind="secondary"] {
-            background: transparent !important;
-            border: 2px solid var(--text-color) !important;
-            color: var(--text-color) !important;
-        }
-        
-        /* Placeholder Color */
+        /* 
+           ==========================================================================
+           PLACEHOLDER STYLES
+           ==========================================================================
+        */
+        /* Input Placeholders - Whitish Gray */
         ::placeholder {
-            color: #94a3b8 !important; /* Whitish Gray (Slate 400) */
+            color: #94a3b8 !important; /* Slate 400 */
             opacity: 1; /* Firefox */
         }
         
-        /* Fix Input Text Color to be compatible with placeholder */
-        input, textarea {
-            color: var(--text-color) !important;
+        :-ms-input-placeholder { /* Internet Explorer 10-11 */
+           color: #94a3b8 !important;
         }
-
-        /* Secondary Buttons (Clear/Delete/Cancel) - High Contrast */
-        [data-testid="baseButton-secondary"] {
-            background: transparent !important;
-            border: 2px solid var(--text-secondary) !important;
-            color: var(--text-color) !important;
-        }
-
-        [data-testid="baseButton-secondary"]:hover {
-            border-color: #ef4444 !important; /* Red on hover */
-            color: #ef4444 !important;
-            background: rgba(239, 68, 68, 0.1) !important;
+        
+        ::-ms-input-placeholder { /* Microsoft Edge */
+           color: #94a3b8 !important;
         }
 
         /* Metrics Values */
