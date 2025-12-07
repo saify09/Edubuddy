@@ -57,6 +57,8 @@ class UserManager:
                 c.execute("ALTER TABLE users ADD COLUMN is_blocked INTEGER DEFAULT 0")
             if 'profession' not in columns:
                 c.execute("ALTER TABLE users ADD COLUMN profession TEXT")
+            if 'bio' not in columns:
+                c.execute("ALTER TABLE users ADD COLUMN bio TEXT")
                 
             conn.commit()
         except Exception as e:
@@ -70,40 +72,89 @@ class UserManager:
 
     def create_user(self, user_data: Dict[str, Any]) -> bool:
         """Create a new user."""
+        conn = sqlite3.connect(self.db_path, timeout=20)
+        c = conn.cursor()
         try:
-            conn = sqlite3.connect(self.db_path, timeout=20)
-            c = conn.cursor()
-            
-            # Hash password
-            pwd_hash = self._hash_password(user_data['password'])
-            
-            # Replaced roll_no with profession, removed father_name/address from strict requirement if needed
-            # We keep the schema compatible by passing None to removed fields if they exist in DB
+            # Check if username exists
+            c.execute("SELECT username FROM users WHERE username = ?", (user_data['username'],))
+            if c.fetchone():
+                return False
+
             c.execute('''
                 INSERT INTO users (
                     username, password_hash, first_name, last_name, 
-                    email, education, profile_pic_path, gender, contact_info, 
-                    profession, is_blocked, roll_no, father_name, address
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)
+                    email, contact_info, gender, profession, bio, profile_pic_path, 
+                    login_count, is_blocked
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)
             ''', (
-                user_data['username'], pwd_hash, user_data['first_name'], 
-                user_data['last_name'], user_data.get('email'), 
-                user_data.get('education'), user_data.get('profile_pic_path'), 
-                user_data.get('gender'), user_data.get('contact_info'),
+                user_data['username'],
+                self._hash_password(user_data['password']),
+                user_data.get('first_name'),
+                user_data.get('last_name'),
+                user_data.get('email'),
+                user_data.get('contact_info'),
+                user_data.get('gender'),
                 user_data.get('profession'),
-                # Deprecated fields passed as None/Empty
-                user_data.get('roll_no', ''), user_data.get('father_name', ''), user_data.get('address', '') 
+                user_data.get('bio'),
+                user_data.get('profile_pic_path')
             ))
-            
             conn.commit()
-            conn.close()
             return True
-        except sqlite3.IntegrityError:
-            print("Username already exists.")
-            return False
         except Exception as e:
             print(f"Error creating user: {e}")
             return False
+        finally:
+            conn.close()
+
+    def update_user(self, username: str, updates: Dict[str, Any]) -> bool:
+        """Update user details."""
+        conn = sqlite3.connect(self.db_path, timeout=20)
+        c = conn.cursor()
+        try:
+            # Filter allowed fields
+            allowed_fields = [
+                'first_name', 'last_name', 'father_name', 'address', 'email', 
+                'education', 'profile_pic_path', 'gender', 'contact_info', 
+                'profession', 'bio'
+            ]
+            
+            valid_updates = {k: v for k, v in updates.items() if k in allowed_fields}
+            
+            if not valid_updates:
+                return False
+                
+            query_parts = [f"{k} = ?" for k in valid_updates.keys()]
+            values = list(valid_updates.values())
+            values.append(username)
+            
+            query = f"UPDATE users SET {', '.join(query_parts)} WHERE username = ?"
+            c.execute(query, values)
+            conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error updating user: {e}")
+            return False
+        finally:
+            conn.close()
+
+    def get_user(self, username: str) -> Optional[Dict[str, Any]]:
+        """Retrieve user details by username."""
+        conn = sqlite3.connect(self.db_path, timeout=20)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        try:
+            c.execute("SELECT * FROM users WHERE username = ?", (username,))
+            row = c.fetchone()
+            if row:
+                return dict(row)
+            return None
+        except Exception as e:
+            print(f"Error retrieving user: {e}")
+            return None
+        finally:
+            conn.close()
+
+
 
     def verify_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
         """
@@ -144,38 +195,7 @@ class UserManager:
         conn.close()
         return None
 
-    def update_user(self, username: str, updates: Dict[str, Any]) -> bool:
-        """Update user profile details."""
-        allowed_fields = [
-            'first_name', 'last_name', 'father_name', 'roll_no', 
-            'address', 'email', 'education', 'profile_pic_path',
-            'gender', 'contact_info'
-        ]
-        
-        fields_to_update = []
-        values = []
-        
-        for k, v in updates.items():
-            if k in allowed_fields:
-                fields_to_update.append(f"{k} = ?")
-                values.append(v)
-        
-        if not fields_to_update:
-            return False
-            
-        values.append(username)
-        
-        try:
-            conn = sqlite3.connect(self.db_path, timeout=20)
-            c = conn.cursor()
-            query = f"UPDATE users SET {', '.join(fields_to_update)} WHERE username = ?"
-            c.execute(query, tuple(values))
-            conn.commit()
-            conn.close()
-            return True
-        except Exception as e:
-            print(f"Error updating user: {e}")
-            return False
+
 
     def block_user(self, username: str) -> bool:
         """Block a user."""
@@ -216,18 +236,7 @@ class UserManager:
             print(f"Error deleting user: {e}")
             return False
 
-    def get_user(self, username: str) -> Optional[Dict[str, Any]]:
-        """Get user details by username."""
-        conn = sqlite3.connect(self.db_path, timeout=20)
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
-        c.execute('SELECT * FROM users WHERE username = ?', (username,))
-        row = c.fetchone()
-        conn.close()
-        
-        if row:
-            return dict(row)
-        return None
+
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         """Get all users for admin dashboard."""

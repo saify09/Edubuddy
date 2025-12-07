@@ -45,10 +45,14 @@ def render_login():
             um = UserManager()
             user = um.verify_user(username, password)
             if user:
-                st.session_state.authenticated = True
-                st.session_state.user = user
-                st.success("Login successful!")
-                st.rerun()
+                # Check for block
+                if user.get('error') == 'blocked':
+                    st.error("Your account has been blocked. Contact admin.")
+                else:
+                    st.session_state.authenticated = True
+                    st.session_state.user = user
+                    st.success("Login successful!")
+                    st.rerun()
             else:
                 st.error("Invalid username or password")
 
@@ -69,23 +73,25 @@ def render_signup():
         return ""
 
     with st.form("signup_form"):
-        col1, col2 = st.columns(2)
-        with col1:
-            first_name = st.text_input("First Name *", key='signup_fname')
-            email = st.text_input("Email")
-            contact_info = st.text_input("Contact Info")
-            
-            # Username with suggestion
-            st.markdown("**:red[Username *]** (lowercase, e.g. john_doe123)")
-            username_input = st.text_input("Username", label_visibility="collapsed", key='signup_username', placeholder="john.doe")
-            
-        with col2:
-            last_name = st.text_input("Last Name *", key='signup_lname')
+        # Mobile Fix: Remove columns for Name fields to prevent squishing
+        first_name = st.text_input("First Name *", key='signup_fname')
+        last_name = st.text_input("Last Name *", key='signup_lname')
+        
+        email = st.text_input("Email")
+        contact_info = st.text_input("Contact Info")
+        
+        col_meta1, col_meta2 = st.columns(2)
+        with col_meta1:
             gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+        with col_meta2:
             profession = st.selectbox("Profession", ["Student", "Teacher", "Professional", "Researcher", "Other"])
-            
-            st.markdown("**:red[Password *]**")
-            password = st.text_input("Password", type="password", label_visibility="collapsed")
+        
+        # Username with suggestion
+        st.markdown("**:red[Username *]** (lowercase, e.g. john_doe123)")
+        username_input = st.text_input("Username", label_visibility="collapsed", key='signup_username', placeholder="john.doe")
+        
+        st.markdown("**:red[Password *]**")
+        password = st.text_input("Password", type="password", label_visibility="collapsed")
 
         # Simplified Education/Bio
         bio = st.text_area("Bio", placeholder="Tell us about your learning goals...")
@@ -166,7 +172,7 @@ def render_signup():
                     "contact_info": contact_info,
                     "gender": gender,
                     "profession": profession,
-                    "education": education,
+                    "bio": bio,
                     "profile_pic_path": pic_path
                 }
                 
