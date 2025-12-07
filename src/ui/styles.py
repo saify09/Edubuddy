@@ -158,37 +158,6 @@ def load_css():
             background: transparent !important;
         }
         
-        [data-testid="baseButton-secondary"]:hover {
-            border-color: #ef4444 !important;
-            color: #ef4444 !important;
-            background-color: rgba(255, 255, 255, 0.1) !important; /* Slight bg for visibility */
-        }
-        
-        /* Fix Hover Text specifically */
-        [data-testid="baseButton-secondary"]:hover p {
-            color: #ef4444 !important;
-        }
-
-        /* Fix Placeholders to be Whitish Gray */
-        input::placeholder, textarea::placeholder {
-            color: #94a3b8 !important; /* Slate 400 - Whitish Gray */
-            opacity: 1;
-        }
-        
-        /* Ensure Inputs have correct text color */
-        .stTextInput > div > div > input,
-        .stSelectbox > div > div > div,
-        .stTextArea > div > div > textarea {
-            color: var(--text-color) !important;
-        }
-
-        /* Metrics Values */
-        [data-testid="stMetricValue"] {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
         
         /* DataFrame/Table Text */
