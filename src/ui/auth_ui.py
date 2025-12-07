@@ -157,8 +157,9 @@ def render_signup():
                     "email": email,
                     "contact_info": contact_info,
                     "gender": gender,
-                    "profession": profession,
                     "bio": bio,
+                    "profession": profession,
+                    "education": education,
                     "profile_pic_path": pic_path
                 }
                 
