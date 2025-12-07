@@ -102,21 +102,15 @@ def edit_profile_dialog():
     from src.auth.user_manager import UserManager
     
     with st.form("edit_profile_form"):
-        st.markdown("**Personal Details**")
-        new_first_name = st.text_input("First Name", value=user.get('first_name', ''))
-        new_last_name = st.text_input("Last Name", value=user.get('last_name', ''))
-        
-        st.markdown("**Contact & Prof**")
-        new_email = st.text_input("Email", value=user.get('email', ''))
-        new_contact = st.text_input("Contact Info", value=user.get('contact_info', ''))
-        new_profession = st.text_input("Profession", value=user.get('profession', ''))
-        
-        st.markdown("**Other**")
-        # Ensure gender index is valid
-        gender_opts = ["Male", "Female", "Other"]
-        curr_gender = user.get('gender', 'Male')
-        idx = gender_opts.index(curr_gender) if curr_gender in gender_opts else 0
-        new_gender = st.selectbox("Gender", gender_opts, index=idx)
+        col1, col2 = st.columns(2)
+        with col1:
+            new_first_name = st.text_input("First Name", value=user.get('first_name', ''))
+            new_gender = st.selectbox("Gender", ["Male", "Female", "Other"], index=["Male", "Female", "Other"].index(user.get('gender', 'Male')) if user.get('gender') in ["Male", "Female", "Other"] else 0)
+            new_email = st.text_input("Email", value=user.get('email', ''))
+        with col2:
+            new_last_name = st.text_input("Last Name", value=user.get('last_name', ''))
+            new_profession = st.text_input("Profession", value=user.get('profession', ''))
+            new_contact = st.text_input("Contact Info", value=user.get('contact_info', ''))
             
         new_bio = st.text_area("Bio", value=user.get('bio', ''))
         new_address = st.text_area("Address", value=user.get('address', ''))
