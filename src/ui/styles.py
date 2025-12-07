@@ -85,13 +85,6 @@ def load_css():
         section[data-testid="stSidebar"] * {
             color: var(--text-color) !important;
         }
-        
-        /* Explicitly target labels in Sidebar to ensure they aren't overridden */
-        section[data-testid="stSidebar"] label, 
-        section[data-testid="stSidebar"] .stMarkdown p {
-            color: var(--text-color) !important;
-            font-weight: 600 !important;
-        }
 
         /* File Uploader - Fix White-on-White */
         [data-testid="stFileUploader"] {
@@ -154,6 +147,37 @@ def load_css():
              background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) !important;
              color: white !important;
              border: none !important;
+        }
+
+        /* 
+           Edit Profile Dialog / Modal Fix
+           User reported unreadable headings and requested gradient bg.
+        */
+        div[role="dialog"] {
+            background: linear-gradient(135deg, var(--bg-color), var(--card-bg)) !important;
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+        }
+        
+        div[role="dialog"] label, 
+        div[role="dialog"] h1, 
+        div[role="dialog"] h2, 
+        div[role="dialog"] h3, 
+        div[role="dialog"] p,
+        div[role="dialog"] div {
+            color: var(--text-color) !important;
+        }
+
+        /* Fix Dialog Close Button */
+        div[role="dialog"] button[aria-label="Close"] {
+            color: var(--text-color) !important;
+        }
+        
+        /* Ensure Inputs in Dialog are visible */
+        div[role="dialog"] input {
+             background-color: var(--bg-color) !important;
+             color: var(--text-color) !important;
+             border: 1px solid var(--glass-border) !important;
         }
 
         /* Fix "Reset / Clear All Data" - This is typically a secondary button.
