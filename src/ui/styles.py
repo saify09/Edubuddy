@@ -127,13 +127,26 @@ def load_css():
             background-color: var(--card-bg) !important;
         }
 
-        /* Buttons */
+        /* Primary Buttons */
         .stButton > button {
             background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
             color: #ffffff !important;
             font-weight: 700;
             border: none;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        /* Secondary Buttons (Clear/Delete/Cancel) - High Contrast */
+        [data-testid="baseButton-secondary"] {
+            background: transparent !important;
+            border: 2px solid var(--text-secondary) !important;
+            color: var(--text-color) !important;
+        }
+
+        [data-testid="baseButton-secondary"]:hover {
+            border-color: #ef4444 !important; /* Red on hover */
+            color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.1) !important;
         }
 
         /* Metrics Values */
