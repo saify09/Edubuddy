@@ -24,7 +24,7 @@ class Summarizer:
             if len(text) > 1500:
                 text = text[:1500]
             
-            output = self.pipe(text, max_length=256, min_length=50, do_sample=False, truncation=True)
+            output = self.pipe(text, max_length=256, min_length=50, do_sample=False)
             return output[0]['summary_text']
         else:
             return "Summarization model not loaded."

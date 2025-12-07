@@ -195,8 +195,6 @@ class UserManager:
         conn.close()
         return None
 
-
-
     def block_user(self, username: str) -> bool:
         """Block a user."""
         try:
@@ -236,14 +234,12 @@ class UserManager:
             print(f"Error deleting user: {e}")
             return False
 
-
-
     def get_all_users(self) -> List[Dict[str, Any]]:
         """Get all users for admin dashboard."""
         conn = sqlite3.connect(self.db_path, timeout=20)
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        c.execute('SELECT username, first_name, last_name, email, roll_no, gender, contact_info, education, last_login, login_count, is_blocked FROM users')
+        c.execute('SELECT username, first_name, last_name, email, roll_no, gender, contact_info, education, last_login, login_count, is_blocked, profession FROM users')
         rows = c.fetchall()
         conn.close()
         

@@ -6,19 +6,7 @@ from PIL import Image
 
 def render_auth():
     """Renders the main authentication interface."""
-    st.markdown("""
-        <style>
-        .auth-container {
-            max_width: 400px;
-            margin: auto;
-            padding: 2rem;
-            border-radius: 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        </style>
-    """, unsafe_allow_html=True)
+
 
     if 'auth_mode' not in st.session_state:
         st.session_state.auth_mode = 'login'
