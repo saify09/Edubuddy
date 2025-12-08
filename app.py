@@ -341,6 +341,12 @@ def render_study():
             if transcription and not transcription.startswith("Error"):
                 user_query = transcription
                 st.success(f"🎤 Transcribed: {user_query}")
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
+def render_quiz():
+    st.header("🧠 Knowledge Check")
+    if not st.session_state.vector_store:
+        st.warning("Please upload documents first.")
         return
 
     # --- Topic Selection ---
