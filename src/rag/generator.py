@@ -39,7 +39,7 @@ class Generator:
             if stream:
                 streamer = TextIteratorStreamer(self.pipe.tokenizer, skip_prompt=True, skip_special_tokens=True)
                 # Enable truncation to be safe, though manual truncation above should handle most cases
-                generation_kwargs = dict(max_length=256, do_sample=False, streamer=streamer, truncation=True, num_beams=1)
+                generation_kwargs = dict(max_length=256, do_sample=False, streamer=streamer, truncation=True)
                 
                 thread = Thread(target=self._run_pipeline, args=(prompt, generation_kwargs))
                 thread.start()

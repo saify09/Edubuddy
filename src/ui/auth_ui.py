@@ -159,7 +159,7 @@ def render_signup():
                     "gender": gender,
                     "bio": bio,
                     "profession": profession,
-                    "education": education,
+                    "bio": bio,
                     "profile_pic_path": pic_path
                 }
                 
