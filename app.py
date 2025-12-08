@@ -345,12 +345,13 @@ def render_study():
         # Main Chat Input
         prompt_text = st.chat_input("Ask a question about your documents...")
         
-        # Use either voice prompt or text prompt
+        # Prioritize text input if available, else check if mic provided input
         if prompt_text:
             user_query = prompt_text
 
+        # Unified Processing
         if user_query:
-            # Add user message
+            # Add user message to history
             st.session_state.messages.append({"role": "user", "content": user_query})
             with st.chat_message("user", avatar="👤"):
                 st.markdown(user_query)
@@ -372,11 +373,17 @@ def render_study():
                     
                     # Retrieve context
                     context = retriever.retrieve(user_query)
+                    
+                    # Debug: Check if context is retrieved
+                    if not context:
+                        st.warning("⚠️ No relevant context found in documents.")
+                        context = [{"text": "No context found."}]
 
                     # Generate response with streaming
                     stream = generator.generate_answer(user_query, context, stream=True)
                     response = st.write_stream(stream)
-                    
+            
+            # Save assistant response to history
             st.session_state.messages.append({"role": "assistant", "content": response})
 
 def render_quiz():
