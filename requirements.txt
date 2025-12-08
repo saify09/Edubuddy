@@ -9,3 +9,6 @@ easyocr>=1.7.1
 opencv-python-headless>=4.8.0
 fpdf>=1.7.2
 matplotlib
+transformers>=4.30.0
+sentencepiece>=0.1.99
+accelerate>=0.20.3

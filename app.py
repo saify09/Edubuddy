@@ -341,54 +341,6 @@ def render_study():
             if transcription and not transcription.startswith("Error"):
                 user_query = transcription
                 st.success(f"🎤 Transcribed: {user_query}")
-            else:
-                if "ffmpeg" in transcription.lower():
-                    st.error("⚠️ FFmpeg not found. Please install FFmpeg to use voice features.")
-                    st.caption("Download from: https://ffmpeg.org/download.html")
-                else:
-                    st.error(transcription)
-
-        # Main Chat Input
-        prompt_text = st.chat_input("Ask a question about your documents...")
-        
-        # Use either voice prompt or text prompt
-        if prompt_text:
-            user_query = prompt_text
-
-        if user_query:
-            # Add user message
-            st.session_state.messages.append({"role": "user", "content": user_query})
-            with st.chat_message("user", avatar="👤"):
-                st.markdown(user_query)
-
-            # Generate response
-            with st.chat_message("assistant", avatar="🤖"):
-                with st.spinner("Thinking..."):
-                    # Cache the heavy models
-                    @st.cache_resource
-                    def get_models_v3(): # Renamed to force cache refresh again
-                        from src.embed.embedder import Embedder
-                        from src.rag.generator import Generator
-                        return Embedder(), Generator()
-
-                    embedder, generator = get_models_v3()
-                    
-                    from src.rag.retriever import Retriever
-                    retriever = Retriever(embedder, st.session_state.vector_store)
-                    
-                    # Retrieve context
-                    context = retriever.retrieve(user_query)
-
-                    # Generate response with streaming
-                    stream = generator.generate_answer(user_query, context, stream=True)
-                    response = st.write_stream(stream)
-                    
-            st.session_state.messages.append({"role": "assistant", "content": response})
-
-def render_quiz():
-    st.header("🧠 Knowledge Check")
-    if not st.session_state.vector_store:
-        st.warning("Please upload documents first.")
         return
 
     # --- Topic Selection ---
