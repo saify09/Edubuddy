@@ -128,8 +128,35 @@ def render_home():
                         from src.embed.indexer import VectorStore
                         
                         embedder = get_embedder()
+                        # Optimized: Batched Embedding
+                        status_text.text(f"🧠 Generating Embeddings (0/{len(chunks)})...")
                         texts = [c['text'] for c in chunks]
-                        embeddings = embedder.embed_chunks(texts)
+                        embeddings = []
+                        batch_size = 32
+                        total_chunks = len(texts)
+                        
+                        import numpy as np
+                        
+                        for i in range(0, total_chunks, batch_size):
+                            batch_texts = texts[i : i + batch_size]
+                            batch_embeddings = embedder.embed_chunks(batch_texts)
+                            
+                            # Handle both list and numpy array returns
+                            if isinstance(batch_embeddings, list):
+                                embeddings.extend(batch_embeddings)
+                            else:
+                                if len(embeddings) == 0:
+                                    embeddings = batch_embeddings
+                                else:
+                                    embeddings = np.concatenate((embeddings, batch_embeddings), axis=0)
+                            
+                            # Update Progress
+                            current_progress = 50 + int((i / total_chunks) * 40) # Scale 50-90%
+                            progress_bar.progress(current_progress)
+                            status_text.text(f"🧠 Generating Embeddings ({min(i + batch_size, total_chunks)}/{total_chunks})...")
+                        
+                        # Ensure final progress before storage
+                        progress_bar.progress(90)
                         
                         progress_bar.progress(80)
                         
