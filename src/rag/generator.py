@@ -29,17 +29,16 @@ class Generator:
         context_text = "\n\n".join([c['text'] for c in context_chunks])
         
         if self.pipe:
-            # Truncate context to ~1000 chars to fit within 512 tokens (leaving space for query)
-            if len(context_text) > 1000:
-                context_text = context_text[:1000] + "...(truncated)"
+            # Truncate context to ~500 chars to fit within 512 tokens (leaving space for query)
+            if len(context_text) > 500:
+                context_text = context_text[:500] + "...(truncated)"
             
             # Prompt engineering for T5
             prompt = f"Answer the following question based on the context below:\n\nContext:\n{context_text}\n\nQuestion: {query}\n\nAnswer:"
             
             if stream:
-                streamer = TextIteratorStreamer(self.pipe.tokenizer, skip_prompt=True, skip_special_tokens=True)
                 # Enable truncation to be safe, though manual truncation above should handle most cases
-                generation_kwargs = dict(max_length=256, do_sample=False, streamer=streamer, truncation=True)
+                generation_kwargs = dict(max_length=256, do_sample=False, streamer=streamer)
                 
                 thread = Thread(target=self._run_pipeline, args=(prompt, generation_kwargs))
                 thread.start()
