@@ -59,11 +59,17 @@ class Generator:
 
     def _run_pipeline(self, prompt, generation_kwargs):
         """Helper to run pipeline in thread with error catching."""
+        streamer = generation_kwargs.get("streamer")
         try:
             # Pass prompt as 'text_inputs' or positional
             # For text2text-generation, the argument is usually just the input string or list
             self.pipe(prompt, **generation_kwargs)
         except Exception as e:
             print(f"ERROR: Pipeline generation failed: {e}")
-            # In case of error, we can't easily close the streamer from here without access to it,
-            # but printing the error helps debugging.
+            # If we have the streamer, send an error message so the UI sees it
+            if streamer:
+                streamer.put("**Error during generation.**")
+        finally:
+            # CRITICAL: Always end the streamer to prevent UI from hanging
+            if streamer:
+                streamer.end()
