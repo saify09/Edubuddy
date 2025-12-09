@@ -388,8 +388,12 @@ def render_study():
                         st.caption(f"🔍 Found {len(context)} relevant chunks.")
 
                     # Generate response with streaming
-                    stream = generator.generate_answer(user_query, context, stream=True)
-                    response = st.write_stream(stream)
+                    try:
+                        stream = generator.generate_answer(user_query, context, stream=True)
+                        response = st.write_stream(stream)
+                    except Exception as e:
+                        st.error(f"Generation Error: {e}")
+                        response = "I encountered an error while thinking."
             
             # Save assistant response to history
             st.session_state.messages.append({"role": "assistant", "content": response})
