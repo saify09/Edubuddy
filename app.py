@@ -128,35 +128,8 @@ def render_home():
                         from src.embed.indexer import VectorStore
                         
                         embedder = get_embedder()
-                        # Optimized: Batched Embedding
-                        status_text.text(f"🧠 Generating Embeddings (0/{len(chunks)})...")
                         texts = [c['text'] for c in chunks]
-                        embeddings = []
-                        batch_size = 32
-                        total_chunks = len(texts)
-                        
-                        import numpy as np
-                        
-                        for i in range(0, total_chunks, batch_size):
-                            batch_texts = texts[i : i + batch_size]
-                            batch_embeddings = embedder.embed_chunks(batch_texts)
-                            
-                            # Handle both list and numpy array returns
-                            if isinstance(batch_embeddings, list):
-                                embeddings.extend(batch_embeddings)
-                            else:
-                                if len(embeddings) == 0:
-                                    embeddings = batch_embeddings
-                                else:
-                                    embeddings = np.concatenate((embeddings, batch_embeddings), axis=0)
-                            
-                            # Update Progress
-                            current_progress = 50 + int((i / total_chunks) * 40) # Scale 50-90%
-                            progress_bar.progress(current_progress)
-                            status_text.text(f"🧠 Generating Embeddings ({min(i + batch_size, total_chunks)}/{total_chunks})...")
-                        
-                        # Ensure final progress before storage
-                        progress_bar.progress(90)
+                        embeddings = embedder.embed_chunks(texts)
                         
                         progress_bar.progress(80)
                         
@@ -341,7 +314,7 @@ def render_study():
                 st.markdown(message["content"])
 
         # Chat Input Area
-        col_mic, col_dummy = st.columns([0.2, 0.8])
+        col_mic, col_dummy = st.columns([0.5, 0.5])
         with col_mic:
             audio_value = st.audio_input("🎤", label_visibility="collapsed") if hasattr(st, 'audio_input') else None
         
@@ -405,6 +378,8 @@ def render_study():
                     if not context:
                         st.warning("⚠️ No relevant context found in documents.")
                         context = [{"text": "No context found."}]
+                    else:
+                        st.caption(f"🔍 Found {len(context)} relevant chunks.")
 
                     # Generate response with streaming
                     stream = generator.generate_answer(user_query, context, stream=True)

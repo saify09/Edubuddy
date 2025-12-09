@@ -16,4 +16,4 @@ class Embedder:
         """
         Embeds a list of strings.
         """
-        return self.model.encode(chunks)
+        return self.model.encode(chunks, batch_size=32, show_progress_bar=True)
