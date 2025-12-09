@@ -37,6 +37,7 @@ class Generator:
             prompt = f"Answer the following question based on the context below:\n\nContext:\n{context_text}\n\nQuestion: {query}\n\nAnswer:"
             
             if stream:
+                streamer = TextIteratorStreamer(self.pipe.tokenizer, skip_prompt=True, skip_special_tokens=True)
                 # Enable truncation to be safe, though manual truncation above should handle most cases
                 generation_kwargs = dict(max_length=256, do_sample=False, streamer=streamer, num_beams=1)
                 
