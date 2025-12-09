@@ -314,7 +314,7 @@ def render_study():
                 st.markdown(message["content"])
 
         # Chat Input Area
-        col_mic, col_dummy = st.columns([0.1, 0.9])
+        col_mic, col_dummy = st.columns([0.2, 0.8])
         with col_mic:
             audio_value = st.audio_input("🎤", label_visibility="collapsed") if hasattr(st, 'audio_input') else None
         

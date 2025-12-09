@@ -60,7 +60,8 @@ class Generator:
     def _run_pipeline(self, prompt, generation_kwargs):
         """Helper to run pipeline in thread with error catching."""
         try:
-            # Pass prompt as positional argument, as 'inputs' kwarg seems to fail
+            # Pass prompt as 'text_inputs' or positional
+            # For text2text-generation, the argument is usually just the input string or list
             self.pipe(prompt, **generation_kwargs)
         except Exception as e:
             print(f"ERROR: Pipeline generation failed: {e}")
