@@ -31,6 +31,11 @@ class SpeechTranscriber:
             return "Error: Speech model not loaded."
             
         try:
+            # Check if ffmpeg is available in system path
+            import shutil
+            if not shutil.which("ffmpeg"):
+                return "Error: FFmpeg is not installed on this system. Audio transcription requires FFmpeg."
+
             # Whisper pipeline handles loading and processing
             result = self.pipe(audio_path)
             return result['text']
