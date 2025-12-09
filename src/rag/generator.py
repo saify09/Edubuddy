@@ -38,7 +38,7 @@ class Generator:
             
             if stream:
                 # Enable truncation to be safe, though manual truncation above should handle most cases
-                generation_kwargs = dict(max_length=256, do_sample=False, streamer=streamer)
+                generation_kwargs = dict(max_length=256, do_sample=False, streamer=streamer, num_beams=1)
                 
                 thread = Thread(target=self._run_pipeline, args=(prompt, generation_kwargs))
                 thread.start()
