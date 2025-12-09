@@ -48,6 +48,6 @@ data/index/
 temp/
 userdata/
 *.db
-edubuddy_users.db
+# edubuddy_users.db
 index.faiss
 metadata.pkl
