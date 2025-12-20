@@ -8,74 +8,98 @@ class QuizGenerator:
 
     def generate_mcq(self, documents: List[Dict], num_questions: int = 5) -> List[Dict]:
         """
-        Generates MCQs using the LLM.
+        Generates MCQs using the LLM with fallback to simple Cloze generation.
         """
         if not documents:
             return []
 
-        # Filter chunks that are long enough
+        # Filter and select docs
         valid_docs = [d for d in documents if len(d['text']) > 100]
         if not valid_docs:
             valid_docs = documents
 
-        # Select random docs to generate questions from
         selected_docs = random.sample(valid_docs, min(num_questions, len(valid_docs)))
         
         quiz = []
         for doc in selected_docs:
-            text = doc['text'][:500] # Limit context for speed
+            text = doc['text'][:500] # Limit context
             source = doc.get('source', 'Unknown')
             
-            prompt = (
-                f"Generate a multiple choice question based on this text: \"{text}\"\n"
-                "Format:\n"
-                "Question: [Question text]\n"
-                "Option A: [Option 1]\n"
-                "Option B: [Option 2]\n"
-                "Option C: [Option 3]\n"
-                "Answer: [Correct Option Text]"
-            )
-            
+            # 1. Try LLM Generation
             try:
-                # Use the generator to get raw text
-                # We reuse generate_answer method but treat prompt as the query
-                response = self.generator.generate_answer(prompt, [], stream=False)
+                prompt = (
+                    "Create a multiple choice question (MCQ) from the context. "
+                    "Format: Question: <question> Option A: <opt1> Option B: <opt2> Option C: <opt3> Answer: <opt_text>"
+                )
                 
-                # Parse response
-                lines = response.split('\n')
-                question = ""
-                options = []
-                answer = ""
+                # Pass text as context so Generator formats it correctly
+                context = [{'text': text}]
+                response = self.generator.generate_answer(prompt, context, stream=False)
                 
-                for line in lines:
-                    line = line.strip()
-                    if line.startswith("Question:"):
-                        question = line.replace("Question:", "").strip()
-                    elif line.startswith("Option"):
-                        options.append(line.split(":", 1)[1].strip())
-                    elif line.startswith("Answer:"):
-                        answer = line.replace("Answer:", "").strip()
+                # Regex Parsing (Handles both multiline and single line)
+                # Look for Question: ... Option A: ...
+                q_match = re.search(r"Question:\s*(.*?)\s*Option A:", response, re.IGNORECASE | re.DOTALL)
+                opt_a_match = re.search(r"Option A:\s*(.*?)\s*Option B:", response, re.IGNORECASE | re.DOTALL)
+                opt_b_match = re.search(r"Option B:\s*(.*?)\s*Option C:", response, re.IGNORECASE | re.DOTALL)
+                # Option C might be followed by Answer or End
+                opt_c_match = re.search(r"Option C:\s*(.*?)\s*(Answer:|$)", response, re.IGNORECASE | re.DOTALL)
+                ans_match = re.search(r"Answer:\s*(.*)", response, re.IGNORECASE | re.DOTALL)
                 
-                # If parsing failed or incomplete, skip
-                if not question or len(options) < 2 or not answer:
-                    continue
+                if q_match and opt_a_match and opt_b_match and opt_c_match:
+                    question = q_match.group(1).strip()
+                    options = [
+                        opt_a_match.group(1).strip(),
+                        opt_b_match.group(1).strip(),
+                        opt_c_match.group(1).strip()
+                    ]
+                    answer = ans_match.group(1).strip() if ans_match else options[0] # Default to first if missing
                     
-                # Ensure answer is in options, if not (LLM hallucination), pick one or skip
-                # Simple Cleanup: If answer is "Option A", map it to the index
-                
-                final_options = options[:4] # Max 4 options
-                
-                quiz.append({
-                    "question": question,
-                    "options": final_options,
-                    "answer": answer,
-                    "source": source
-                })
-                
+                    # Clean answer if it says "Option A"
+                    if "Option A" in answer: answer = options[0]
+                    elif "Option B" in answer: answer = options[1]
+                    elif "Option C" in answer: answer = options[2]
+                    
+                    # Ensure answer is in options
+                    if answer not in options:
+                        options.append(answer)
+                        random.shuffle(options)
+                    
+                    quiz.append({
+                        "question": question,
+                        "options": options,
+                        "answer": answer,
+                        "source": source
+                    })
+                    continue # Success, move to next doc
+
             except Exception as e:
-                print(f"Quiz Gen Error: {e}")
-                continue
-            
+                print(f"LLM Quiz Gen failed: {e}")
+                # Fallback to logic below
+
+            # 2. Fallback: Simple Cloze (Fill-in-the-blank)
+            # Pick a sentence and blank out a word
+            sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', text)
+            suitable = [s for s in sentences if 30 < len(s) < 200]
+            if suitable:
+                sentence = random.choice(suitable)
+                words = [w for w in sentence.split() if w.isalpha() and len(w) > 4]
+                if words:
+                    target_word = random.choice(words)
+                    question_text = sentence.replace(target_word, "______")
+                    
+                    # Fake options from text
+                    all_words = [w for w in text.split() if w.isalpha() and len(w) > 4 and w != target_word]
+                    distractors = random.sample(all_words, 3) if len(all_words) >= 3 else ["Option A", "Option B", "Option C"]
+                    opts = distractors + [target_word]
+                    random.shuffle(opts)
+                    
+                    quiz.append({
+                        "question": question_text,
+                        "options": opts,
+                        "answer": target_word,
+                        "source": source
+                    })
+
         return quiz
 
     def generate_short_answer(self, text: str, num_questions: int = 5) -> List[Dict]:
