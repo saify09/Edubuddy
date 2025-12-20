@@ -286,11 +286,11 @@ def render_study():
                     all_text = " ".join([m['text'] for m in docs])
                     
                     @st.cache_resource
-                    def get_summarizer():
+                    def get_summarizer_v2():
                         from src.utils.summarizer import Summarizer
                         return Summarizer()
                         
-                    summarizer = get_summarizer()
+                    summarizer = get_summarizer_v2()
                     summary = summarizer.summarize(all_text[:5000], topic=st.session_state.selected_topic)
                     st.session_state.current_summary = summary
                 else:
