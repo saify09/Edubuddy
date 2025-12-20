@@ -291,7 +291,7 @@ def render_study():
                         return Summarizer()
                         
                     summarizer = get_summarizer()
-                    summary = summarizer.summarize(all_text[:5000])
+                    summary = summarizer.summarize(all_text[:5000], topic=st.session_state.selected_topic)
                     st.session_state.current_summary = summary
                 else:
                     st.warning("No content found for this topic.")
@@ -328,20 +328,24 @@ def render_study():
             with open(audio_path, "wb") as f:
                 f.write(audio_value.getbuffer())
             
-            # Transcribe
-            from src.utils.speech import SpeechTranscriber
-            
-            @st.cache_resource
-            def get_transcriber():
-                return SpeechTranscriber()
+            # Check if file is valid (non-empty)
+            if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                # Transcribe
+                from src.utils.speech import SpeechTranscriber
                 
-            transcriber = get_transcriber()
-            transcription = transcriber.transcribe(audio_path)
-            
-            if transcription and not transcription.startswith("Error"):
-                user_query = transcription
-                st.success(f"🎤 Transcribed: {user_query}")
-            
+                @st.cache_resource
+                def get_transcriber():
+                    return SpeechTranscriber()
+                    
+                transcriber = get_transcriber()
+                transcription = transcriber.transcribe(audio_path)
+                
+                if transcription and not transcription.startswith("Error"):
+                    user_query = transcription
+                    st.success(f"🎤 Transcribed: {user_query}")
+            else:
+                st.warning("🎤 Audio recording was too short or empty.")
+
             # Cleanup temp file
             try:
                 os.remove(audio_path)
@@ -422,14 +426,16 @@ def render_quiz():
             if not docs:
                 st.error("No content found for this topic.")
             else:
-                from src.utils.quiz_generator import QuizGenerator
+                # Load Generator for Quiz
                 @st.cache_resource
-                def get_quiz_model():
+                def get_quiz_llm(): 
                     from src.rag.generator import Generator
                     return Generator()
                 
-                quiz_llm = get_quiz_model()
-                qg = QuizGenerator(generator=quiz_llm)
+                generator = get_quiz_llm()
+                
+                from src.utils.quiz_generator import QuizGenerator
+                qg = QuizGenerator(generator)
                 
                 st.session_state.current_quiz = qg.generate_mcq(docs, num_questions=5)
                 st.session_state.quiz_answers = {}

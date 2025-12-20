@@ -15,7 +15,7 @@ class Summarizer:
             print(f"Failed to load model: {e}")
             self.pipe = None
 
-    def summarize(self, text: str, sentences_count: int = 5) -> str:
+    def summarize(self, text: str, sentences_count: int = 5, topic: str = None) -> str:
         """
         Generates an abstractive summary using LLM.
         """
@@ -24,7 +24,13 @@ class Summarizer:
             if len(text) > 1500:
                 text = text[:1500]
             
-            output = self.pipe(text, max_length=256, min_length=50, do_sample=False)
+            if topic and topic != "All Topics":
+                # Inject topic focus into the input text for T5
+                input_text = f"Summarize this text focusing on {topic}: {text}"
+            else:
+                input_text = text
+            
+            output = self.pipe(input_text, max_length=256, min_length=50, do_sample=False)
             return output[0]['summary_text']
         else:
             return "Summarization model not loaded."
