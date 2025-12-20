@@ -423,7 +423,14 @@ def render_quiz():
                 st.error("No content found for this topic.")
             else:
                 from src.utils.quiz_generator import QuizGenerator
-                qg = QuizGenerator()
+                @st.cache_resource
+                def get_quiz_model():
+                    from src.rag.generator import Generator
+                    return Generator()
+                
+                quiz_llm = get_quiz_model()
+                qg = QuizGenerator(generator=quiz_llm)
+                
                 st.session_state.current_quiz = qg.generate_mcq(docs, num_questions=5)
                 st.session_state.quiz_answers = {}
                 st.session_state.quiz_submitted = False
