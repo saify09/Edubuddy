@@ -30,6 +30,9 @@ def render_login():
         submitted = st.form_submit_button("Login", width="stretch")
         
         if submitted:
+            # Normalize username to match signup logic
+            username = username.lower().strip()
+            
             um = UserManager()
             user = um.verify_user(username, password)
             if user:
